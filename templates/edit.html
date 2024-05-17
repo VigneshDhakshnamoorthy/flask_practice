@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Client Information</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    button {
+      margin-top: 10px;
+    }
+
+    .table-container {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edit Client Information</h1>
+  
+  <div>
+    <select id="projectSelect" onchange="fetchData()">
+      <option value="project1">Project 1</option>
+      <option value="project2">Project 2</option>
+      <!-- Add more projects as needed -->
+    </select>
+    
+    <select id="weekSelect" onchange="fetchData()">
+      <option value="week1">Week 1</option>
+      <option value="week2">Week 2</option>
+      <!-- Add more weeks as needed -->
+    </select>
+  </div>
+
+  <div class="table-container">
+    <h2>Table 1</h2>
+    <table id="clientTable1">
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <h2>Table 2</h2>
+    <table id="clientTable2">
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <h2>Table 3</h2>
+    <table id="clientTable3">
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <button id="saveData">Save</button>
+  <button onclick="window.location.href = '/';">Go Back</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      fetchData();
+    });
+
+    function fetchData() {
+      var project = document.getElementById("projectSelect").value;
+      var week = document.getElementById("weekSelect").value;
+      fetch('/fetch_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          project: project,
+          week: week
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        fillTable('clientTable1', data.data1);
+        fillTable('clientTable2', data.data2);
+        fillTable('clientTable3', data.data3);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+    }
+
+    function fillTable(tableId, data) {
+      var tableBody = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      tableBody.innerHTML = ''; // Clear table body
+      data.forEach(row => {
+        var newRow = tableBody.insertRow(tableBody.rows.length);
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        cell1.contentEditable = true;
+        cell2.contentEditable = true;
+        cell1.innerText = row[3];
+        cell2.innerText = row[4];
+        // Store the ID in a data attribute
+        newRow.setAttribute('data-id', row[0]);
+      });
+    }
+
+    document.getElementById("saveData").addEventListener("click", function() {
+      var project = document.getElementById("projectSelect").value;
+      var week = document.getElementById("weekSelect").value;
+
+      function collectData(tableId) {
+        var ids = [];
+        var column1Data = [];
+        var column2Data = [];
+        var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        var rows = table.getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+          var cells = rows[i].getElementsByTagName('td');
+          ids.push(rows[i].getAttribute('data-id'));
+          column1Data.push(cells[0].innerText);
+          column2Data.push(cells[1].innerText);
+        }
+        return { ids: ids, column1: column1Data, column2: column2Data };
+      }
+
+      var data1 = collectData('clientTable1');
+      var data2 = collectData('clientTable2');
+      var data3 = collectData('clientTable3');
+
+      fetch('/update_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          project: project,
+          week: week,
+          data1: data1,
+          data2: data2,
+          data3: data3
+        })
+      }).then(response => {
+        if (response.ok) {
+          alert('Data updated successfully');
+        } else {
+          alert('Error updating data');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

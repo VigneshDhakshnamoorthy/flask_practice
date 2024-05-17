@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Information</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    button {
+      margin-top: 10px;
+    }
+
+    .table-container {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>WSR Creation</h1>
+
+  <div>
+    <select id="projectSelect">
+      <option value="project1">Project 1</option>
+      <option value="project2">Project 2</option>
+      <!-- Add more projects as needed -->
+    </select>
+
+    <select id="weekSelect">
+      <option value="week1">Week 1</option>
+      <option value="week2">Week 2</option>
+      <!-- Add more weeks as needed -->
+    </select>
+  </div>
+
+  <div class="table-container">
+    <h2>Utilization By Task</h2>
+    <table id="utilizationByTask">
+      <thead>
+        <tr>
+          <th>Task Name</th>
+          <th>Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="utilizationByTask">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Utilization By Resource</h2>
+    <table id="utilizationByResource">
+      <thead>
+        <tr>
+          <th>Resource Name</th>
+          <th>Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="utilizationByResource">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Task Last Week</h2>
+    <table id="taskLastWeek">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th>ETC</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="taskLastWeek">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Task Current Week</h2>
+    <table id="taskCurrentWeek">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th>ETC</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="taskCurrentWeek">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Week Defect Summary</h2>
+    <table id="weekDefectSummary">
+      <thead>
+        <tr>
+          <th>Defect ID</th>
+          <th>Defect Name</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Assigned To</th>
+          <th>ETC</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="weekDefectSummary">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Activity This Week</h2>
+    <table id="activityThisWeek">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="activityThisWeek">Add Row</button>
+  </div>
+
+  <button id="saveData">Save</button>
+  <button id="cancel">Cancel</button>
+  <button onclick="window.location.href = '/edit';">Edit</button>
+  <script>
+    document.querySelectorAll(".addRow").forEach(button => {
+      button.addEventListener("click", function () {
+        var tableId = this.getAttribute('data-table');
+        var table = document.getElementById(tableId);
+        var newRow = table.getElementsByTagName('tbody')[0].insertRow();
+        var numCols = table.rows[0].cells.length;
+        for (var i = 0; i < numCols; i++) {
+          var cell = newRow.insertCell(i);
+          cell.contentEditable = true;
+        }
+      });
+    });
+
+    document.getElementById("saveData").addEventListener("click", function () {
+      var project = document.getElementById("projectSelect").value;
+      var week = document.getElementById("weekSelect").value;
+
+      function collectData(tableId) {
+        var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        var rows = table.getElementsByTagName('tr');
+        var data = [];
+        for (var i = 0; i < rows.length; i++) {
+          var cells = rows[i].getElementsByTagName('td');
+          var rowData = [];
+          for (var j = 0; j < cells.length; j++) {
+            rowData.push(cells[j].innerText);
+          }
+          data.push(rowData);
+        }
+        return data;
+      }
+
+      var utilization_by_task = collectData('utilizationByTask');
+      var utilization_by_resource = collectData('utilizationByResource');
+      var task_last_week = collectData('taskLastWeek');
+      var task_current_week = collectData('taskCurrentWeek');
+      var week_defect_summary = collectData('weekDefectSummary');
+      var activity_this_week = collectData('activityThisWeek');
+
+      fetch('/save_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          project: project,
+          week: week,
+          utilization_by_task: utilization_by_task,
+          utilization_by_resource: utilization_by_resource,
+          task_last_week: task_last_week,
+          task_current_week: task_current_week,
+          week_defect_summary: week_defect_summary,
+          activity_this_week: activity_this_week
+        })
+      }).then(response => {
+        if (response.ok) {
+          alert('Data saved successfully');
+        } else {
+          alert('Error saving data');
+        }
+      });
+
+      document.querySelectorAll("tbody").forEach(tbody => {
+        tbody.innerHTML = ''; // Clear table bodies
+      });
+    });
+
+    document.getElementById("cancel").addEventListener("click", function () {
+      document.querySelectorAll("tbody").forEach(tbody => {
+        tbody.innerHTML = ''; // Clear table bodies
+      });
+    });
+  </script>
+</body>
+
+</html>
