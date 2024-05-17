@@ -1,7 +1,10 @@
-from flask import Flask, Response, jsonify, render_template, request
+from typing import Any, Generator, List, Tuple
+from flask import Flask, Response, jsonify, render_template, request, session
 from database_helper import DatabaseHelper
 
 app = Flask(__name__)
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'filesystem'
 
 db_name = './database/wsr.db'
 
@@ -15,6 +18,51 @@ def index() -> str:
 @app.route('/edit')
 def edit() -> str:
     return render_template('edit.html')
+
+data = [
+    ["John", "Doe", 30],
+    ["Jane", "Smith", 25],
+    ["Bob", "Johnson", 35]
+]
+
+@app.route('/editable', methods=['GET', 'POST'])
+def editable():
+    if request.method == 'POST':
+        # Handle update request
+        updated_data = request.json['data']
+        for row in updated_data:
+            row_index = int(row['row'])
+            column_index = int(row['column'])
+            new_value = row['value']
+            print(new_value)
+            data[row_index][column_index] = new_value
+        return jsonify({'message': 'Data updated successfully'})
+    # Pass data to the template
+    return render_template('editable.html', data=data)
+
+@app.route('/sample' , methods=['GET', 'POST'])
+def sample() -> str:
+    project_select: str | None = None
+    week_select: str | None = None
+    project_list: list =  ["Project1", "Project2"]
+    week_list: list =  ["Week1", "Week2"]
+    if request.method == 'GET':
+        session["select_project"] = project_list[0]
+        project_select = project_list[0]
+        week_select = week_list[0]
+
+    if request.method == "POST" and "select_project" in request.form:
+        project_select = request.form.get("select_project")
+        session["select_project"] = project_select
+        week_select:str = session["select_week"]
+
+    if request.method == "POST" and "select_week" in request.form:
+        week_select = request.form.get("select_week")
+        session["select_week"] = week_select
+        project_select:str = session["select_project"]
+         
+    print(f"Project : {project_select} Week : {week_select}")
+    return render_template('sample.html',project_list =project_list, week_list = week_list, selected_project = project_select, selected_week = week_select)
 
 @app.route('/save_data', methods=['POST'])
 def save_data() -> str:
@@ -39,23 +87,28 @@ def save_data() -> str:
 
 @app.route('/fetch_data', methods=['POST'])
 def fetch_data() -> Response:
-    project = request.json['project']
-    week = request.json['week']
-    data = {}
+    project: Any = request.json['project']
+    week: Any = request.json['week']
+    data: dict = {}
     for table_name in db_helper.get_table_names():
-        data[table_name] = db_helper.fetch_data(table_name, 'project=? AND week=?', (project, week))
+        fetch_data_query: List[Tuple[Any]] = db_helper.fetch_data(table_name, 'project=? AND week=?', (project, week))
+        data[table_name] = [sq for sq in fetch_data_query]
     return jsonify(data)
+
+
 
 @app.route('/update_data', methods=['POST'])
 def update_data() -> str:
-    project = request.json['project']
-    week = request.json['week']
-
+    project: Any = request.json['project']
+    week: Any = request.json['week']
+    print(request.json)
     def update_table(table_name, data):
         for row in data:
-            id = row.pop('id')  # Remove ID from the row
-            db_helper.update_data(table_name, ', '.join([f"{key}=? " for key in row.keys()]), 'id=?', tuple(row.values()) + (id,))
-
+            if 'id' in row:
+                id = row.pop('id')
+                set_clause = ', '.join([f"{key}=?" for key in row.keys()])
+                db_helper.update_data(table_name, set_clause, 'id=?', tuple(row.values()) + (id,))
+            
     update_table('utilization_by_task', request.json['utilization_by_task'])
     update_table('utilization_by_resource', request.json['utilization_by_resource'])
     update_table('task_last_week', request.json['task_last_week'])

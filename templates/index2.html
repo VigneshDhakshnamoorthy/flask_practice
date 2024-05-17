@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilization by Task</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Utilization by Task</h1>
+    <table id="editableTable">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td contenteditable="true">{{ row['task'] }}</td>
+                <td contenteditable="true">{{ row['hours'] }}</td>
+                <td style="display: none;">{{ row['id'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button id="updateBtn">Update</button>
+
+    <script>
+        document.getElementById('updateBtn').addEventListener('click', function () {
+            var updatedData = [];
+            var tableRows = document.querySelectorAll('#editableTable tbody tr');
+            tableRows.forEach(function (row) {
+                var cells = row.querySelectorAll('td');
+                updatedData.push({
+                    id: cells[2].innerText,
+                    task: cells[0].innerText,
+                    hours: cells[1].innerText
+                });
+            });
+
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: updatedData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

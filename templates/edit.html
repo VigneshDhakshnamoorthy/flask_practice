@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Client Information</title>
+  <title>Edit Data</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,7 +16,8 @@
       margin-top: 20px;
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid #dddddd;
       text-align: left;
       padding: 8px;
@@ -28,154 +30,264 @@
     .table-container {
       margin-bottom: 30px;
     }
+
+    .hidden {
+      display: none;
+  }
   </style>
 </head>
+
 <body>
-  <h1>Edit Client Information</h1>
-  
+  <h1>Edit WSR Data</h1>
+
   <div>
-    <select id="projectSelect" onchange="fetchData()">
+    <select id="projectSelect">
       <option value="project1">Project 1</option>
       <option value="project2">Project 2</option>
       <!-- Add more projects as needed -->
     </select>
-    
-    <select id="weekSelect" onchange="fetchData()">
+
+    <select id="weekSelect">
       <option value="week1">Week 1</option>
       <option value="week2">Week 2</option>
       <!-- Add more weeks as needed -->
     </select>
+    <button id="loadData">Load Data</button>
   </div>
 
   <div class="table-container">
-    <h2>Table 1</h2>
-    <table id="clientTable1">
+    <h2>Utilization By Task</h2>
+    <table id="utilizationByTask">
       <thead>
         <tr>
-          <th>Column 1</th>
-          <th>Column 2</th>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Task Name</th>
+          <th>Hours</th>
         </tr>
       </thead>
       <tbody>
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
+    <button class="addRow" data-table="utilizationByTask">Add Row</button>
   </div>
 
   <div class="table-container">
-    <h2>Table 2</h2>
-    <table id="clientTable2">
+    <h2>Utilization By Resource</h2>
+    <table id="utilizationByResource">
       <thead>
         <tr>
-          <th>Column 1</th>
-          <th>Column 2</th>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Resource Name</th>
+          <th>Hours</th>
         </tr>
       </thead>
       <tbody>
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
+    <button class="addRow" data-table="utilizationByResource">Add Row</button>
   </div>
 
   <div class="table-container">
-    <h2>Table 3</h2>
-    <table id="clientTable3">
+    <h2>Task Last Week</h2>
+    <table id="taskLastWeek">
       <thead>
         <tr>
-          <th>Column 1</th>
-          <th>Column 2</th>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Task</th>
+          <th>Status</th>
+          <th>ETC</th>
+          <th>Comments</th>
         </tr>
       </thead>
       <tbody>
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
+    <button class="addRow" data-table="taskLastWeek">Add Row</button>
   </div>
 
-  <button id="saveData">Save</button>
-  <button onclick="window.location.href = '/';">Go Back</button>
+  <div class="table-container">
+    <h2>Task Current Week</h2>
+    <table id="taskCurrentWeek">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Task</th>
+          <th>Status</th>
+          <th>ETC</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="taskCurrentWeek">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Week Defect Summary</h2>
+    <table id="weekDefectSummary">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Defect ID</th>
+          <th>Defect Name</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Assigned To</th>
+          <th>ETC</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="weekDefectSummary">Add Row</button>
+  </div>
+
+  <div class="table-container">
+    <h2>Activity This Week</h2>
+    <table id="activityThisWeek">
+      <thead>
+        <tr>
+           <th>ID</th>
+          <th>Project</th>
+          <th>Week</th>
+          <th>Activity</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+    <button class="addRow" data-table="activityThisWeek">Add Row</button>
+  </div>
+
+  <button id="updateData">Update</button>
+  <button id="cancel">Cancel</button>
+  <button onclick="window.location.href = '/';">Create</button>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      fetchData();
+    document.querySelectorAll(".addRow").forEach(button => {
+      button.addEventListener("click", function () {
+        var tableId = this.getAttribute('data-table');
+        var table = document.getElementById(tableId);
+        var newRow = table.getElementsByTagName('tbody')[0].insertRow();
+        var numCols = table.rows[0].cells.length;
+        for (var i = 0; i < numCols; i++) {
+          var cell = newRow.insertCell(i);
+          cell.contentEditable = true;
+        }
+      });
     });
 
-    function fetchData() {
+    document.getElementById("loadData").addEventListener("click", function () {
       var project = document.getElementById("projectSelect").value;
       var week = document.getElementById("weekSelect").value;
+
       fetch('/fetch_data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          project: project,
-          week: week
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        fillTable('clientTable1', data.data1);
-        fillTable('clientTable2', data.data2);
-        fillTable('clientTable3', data.data3);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+        body: JSON.stringify({ project: project, week: week })
+      }).then(response => response.json()).then(data => {
+        loadTableData('utilizationByTask', data.utilization_by_task);
+        loadTableData('utilizationByResource', data.utilization_by_resource);
+        loadTableData('taskLastWeek', data.task_last_week);
+        loadTableData('taskCurrentWeek', data.task_current_week);
+        loadTableData('weekDefectSummary', data.week_defect_summary);
+        loadTableData('activityThisWeek', data.activity_this_week);
       });
-    }
+    });
 
-    function fillTable(tableId, data) {
+    
+
+    function loadTableData(tableId, data) {
       var tableBody = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-      tableBody.innerHTML = ''; // Clear table body
+      tableBody.innerHTML = '';
       data.forEach(row => {
-        var newRow = tableBody.insertRow(tableBody.rows.length);
-        var cell1 = newRow.insertCell(0);
-        var cell2 = newRow.insertCell(1);
-        cell1.contentEditable = true;
-        cell2.contentEditable = true;
-        cell1.innerText = row[3];
-        cell2.innerText = row[4];
-        // Store the ID in a data attribute
-        newRow.setAttribute('data-id', row[0]);
+        var newRow = tableBody.insertRow();
+        row.forEach(cellData => {
+          var cell = newRow.insertCell();
+          cell.contentEditable = true;
+          cell.innerText = cellData;
+        });
       });
     }
 
-    document.getElementById("saveData").addEventListener("click", function() {
+    document.getElementById("updateData").addEventListener("click", function () {
       var project = document.getElementById("projectSelect").value;
       var week = document.getElementById("weekSelect").value;
 
+      // Define column mappings for each table
+      var columnMappings = {
+        "utilizationByTask": ["id", "project", "week", "task_name", "hours"],
+        "utilizationByResource": ["id", "project", "week", "resource_name", "hours"],
+        "taskLastWeek": ["id", "project", "week", "task", "status", "etc", "comments"],
+        "taskCurrentWeek": ["id", "project", "week", "task", "status", "etc", "comments"],
+        "weekDefectSummary": ["id", "project", "week", "defect_id", "defect_name", "severity", "status", "assigned_to", "etc", "comments"],
+        "activityThisWeek": ["id", "project", "week", "activity", "count"]
+      };
+
       function collectData(tableId) {
-        var ids = [];
-        var column1Data = [];
-        var column2Data = [];
         var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         var rows = table.getElementsByTagName('tr');
+        var data = [];
         for (var i = 0; i < rows.length; i++) {
           var cells = rows[i].getElementsByTagName('td');
-          ids.push(rows[i].getAttribute('data-id'));
-          column1Data.push(cells[0].innerText);
-          column2Data.push(cells[1].innerText);
+          var rowData = {};
+          var columnNames = columnMappings[tableId];
+          for (var j = 0; j < cells.length; j++) {
+            rowData[columnNames[j]] = cells[j].innerText;
+          }
+          data.push(rowData);
         }
-        return { ids: ids, column1: column1Data, column2: column2Data };
+        return data;
       }
 
-      var data1 = collectData('clientTable1');
-      var data2 = collectData('clientTable2');
-      var data3 = collectData('clientTable3');
+      // Collect data for each table
+      var utilizationByTaskData = collectData("utilizationByTask");
+      var utilizationByResourceData = collectData("utilizationByResource");
+      var taskLastWeekData = collectData("taskLastWeek");
+      var taskCurrentWeekData = collectData("taskCurrentWeek");
+      var weekDefectSummaryData = collectData("weekDefectSummary");
+      var activityThisWeekData = collectData("activityThisWeek");
 
-      
+      // Construct the request payload
+      var requestData = {
+        "project": project,
+        "week": week,
+        "utilization_by_task": utilizationByTaskData,
+        "utilization_by_resource": utilizationByResourceData,
+        "task_last_week": taskLastWeekData,
+        "task_current_week": taskCurrentWeekData,
+        "week_defect_summary": weekDefectSummaryData,
+        "activity_this_week": activityThisWeekData
+      };
+
+      // Send the data to the Flask backend
       fetch('/update_data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          project: project,
-          week: week,
-          data1: data1,
-          data2: data2,
-          data3: data3
-        })
+        body: JSON.stringify(requestData)
       }).then(response => {
         if (response.ok) {
           alert('Data updated successfully');
@@ -184,6 +296,13 @@
         }
       });
     });
+
+    document.getElementById("cancel").addEventListener("click", function () {
+      document.querySelectorAll("tbody").forEach(tbody => {
+        tbody.innerHTML = ''; // Clear table bodies
+      });
+    });
   </script>
 </body>
+
 </html>
