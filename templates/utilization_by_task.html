@@ -1,0 +1,75 @@
+<h1>Utilization by Task</h1>
+<table id="utilizationByTask">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in utilization_by_task %}
+        <tr>
+            <td contenteditable="true">{{ row['task_name'] }}</td>
+            <td contenteditable="true">{{ row['hours'] }}</td>
+            <td style="display: none;">{{ row['id'] }}</td>
+            <td><button class="deleteBtn">Delete</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<button id="updateBtn">Update</button>
+
+<script>
+    document.getElementById('updateBtn').addEventListener('click', function () {
+        var updatedData = [];
+        var tableRows = document.querySelectorAll('#utilizationByTask tbody tr');
+        tableRows.forEach(function (row) {
+            var cells = row.querySelectorAll('td');
+            updatedData.push({
+                id: cells[2].innerText,
+                task_name: cells[0].innerText,
+                hours: cells[1].innerText
+            });
+        });
+
+        fetch('/update/utilization_by_task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: updatedData })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+    document.querySelectorAll('.deleteBtn').forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            var row = this.closest('tr');
+            var id = row.cells[2].innerText; // Get the ID from the hidden cell
+            fetch(`/delete/utilization_by_task/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Success') {
+                        row.remove();
+                        alert('Data Deleted successfully');
+                    } else {
+                        alert('Error deleting row');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>

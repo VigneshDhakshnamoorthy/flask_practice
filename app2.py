@@ -1,27 +1,44 @@
 import sqlite3
-from flask import Flask, render_template, request, jsonify, session
+from typing import LiteralString
+from database_helper import DatabaseHelper
+from flask import Flask, Response, render_template, request, jsonify, session
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
+db_name = 'database.db'
 
-# Function to establish database connection
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+db_helper = DatabaseHelper(db_name)
 
-# Initialize database
-def init_database():
-    conn = get_db_connection()
-    conn.execute('CREATE TABLE IF NOT EXISTS utilizationbytask (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT, hours INTEGER)')
-    conn.close()
+@app.route('/')
+def index() -> str:
+    project_list: list =  ["Project1", "Project2"]
+    week_list: list =  ["Week1", "Week2"]
+    return render_template('wsr_create.html', project_list =project_list, week_list = week_list)
 
-# Initialize the database when the application starts
-init_database()
+@app.route('/save_data', methods=['POST'])
+def save_data() -> str:
+    if request.method == 'POST':
+        project = request.json['project']
+        week = request.json['week']
+        print(request.json)
+        def save_to_table(table_name, data):
+            project = request.json['project']
+            week = request.json['week']
+            data_to_save = [(project, week) + tuple(row) for row in data]
+            db_helper.save_data(table_name, db_helper.get_table_dict()[table_name],data_to_save)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+        save_to_table('utilization_by_task', request.json['utilization_by_task'])
+        save_to_table('utilization_by_resource', request.json['utilization_by_resource'])
+        save_to_table('task_last_week', request.json['task_last_week'])
+        save_to_table('task_current_week', request.json['task_current_week'])
+        save_to_table('week_defect_summary', request.json['week_defect_summary'])
+        save_to_table('activity_this_week', request.json['activity_this_week'])
+
+        return 'Data saved successfully'
+
+@app.route('/edit', methods=['GET', 'POST'])
+def edit() -> str:
     project_select: str | None = None
     week_select: str | None = None
     project_list: list =  ["Project1", "Project2"]
@@ -35,35 +52,42 @@ def index():
         project_select = request.form.get("select_project")
         session["select_project"] = project_select
         week_select:str = session["select_week"]
-        return jsonify({'message': f'{project_select} & {week_select} Selected'})
 
     if request.method == "POST" and "select_week" in request.form:
         week_select = request.form.get("select_week")
         session["select_week"] = week_select
         project_select:str = session["select_project"]
-        return jsonify({'message': f'{project_select} & {week_select} Selected'})
          
     print(f"Project : {project_select} Week : {week_select}")
-    conn = get_db_connection()
-    project_select = "Project1"
-    week_select = "Week1"
+    utilization_by_task = db_helper.fetch_all('SELECT id, task_name, hours FROM utilization_by_task WHERE project = ? AND week = ?', (project_select, week_select))
+    activity_this_week = db_helper.fetch_all('SELECT id, activity, count FROM activity_this_week WHERE project = ? AND week = ?', (project_select, week_select))
+  
+    return render_template('index2.html', utilization_by_task=utilization_by_task, activity_this_week=activity_this_week, project_list =project_list, week_list = week_list, selected_project = project_select, selected_week = week_select)
+
+@app.route('/update/<table_name>', methods=['GET', 'POST'])
+def update(table_name: str) -> Response | None:
     if request.method == 'POST'and 'data' in request.json:
-        project_select:str = session["select_project"]
-        week_select:str = session["select_week"]
-        updated_data = request.json['data']
-        for row in updated_data:
-            task_id = row['id']
-            task = row['task']
-            hours = row['hours']
-            conn.execute('UPDATE utilizationbytask SET task = ?, hours = ? WHERE id = ?', (task, hours, task_id))
-        conn.commit()
-        conn.close()
-        return jsonify({'message': 'Data updated successfully'})
-    # Fetch data from the database
-    cursor = conn.execute('SELECT id, task, hours FROM utilizationbytask WHERE project = ? AND week = ?', (project_select, week_select))
-    data = cursor.fetchall()
-    conn.close()
-    return render_template('index2.html', data=data, project_list =project_list, week_list = week_list, selected_project = project_select, selected_week = week_select)
+            updated_data = request.json['data']
+            for row in updated_data:
+                set_clause: list = []
+                values: list = []
+                for key in row.keys():
+                    if key != 'id':
+                        set_clause.append(f"{key} = ?")
+                        values.append(row[key])
+                where_clause: str = f"WHERE id = ?"
+                values.append(row['id'])
+                set_clause_str: str = ", ".join(set_clause)
+                update_string: str = f"UPDATE {table_name} SET {set_clause_str} {where_clause}"
+                values_tuple = tuple(values)
+                print(f"{update_string}, {values_tuple}")
+                db_helper.execute_query(f"{update_string}", values_tuple)
+            return jsonify({'message': 'Data updated successfully'})
+
+@app.route('/delete/<table_name>/<int:id>', methods=['POST'])
+def delete(table_name: str, id):
+    db_helper.execute_query(f'DELETE FROM {table_name} WHERE id = ?', (id,))
+    return jsonify({'message': 'Success'})
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=6967, threaded=True)

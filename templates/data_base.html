@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Utilization by Task</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="POST">
+        <label for="select_project" style="font-size: small"><b>SELECT PROJECT</b></label><span class=""> : </span>
+        <select id="select_project" name="select_project">
+            {% for option in project_list %} {% if option == selected_project %}
+            <option value="{{ option }}" selected>{{ option }}</option>
+            {% else %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endif %} {% endfor %}
+        </select>
+    </form>
+    <form method="POST">
+        <label for="select_week" style="font-size: small"><b>SELECT WEEK</b></label><span class=""> : </span>
+        <select id="select_week" name="select_week">
+            {% for option in week_list %} {% if option == selected_week %}
+            <option value="{{ option }}" selected>{{ option }}</option>
+            {% else %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endif %} {% endfor %}
+        </select>
+    </form>
+    {% if not selected_project == None or selected_week == None%}
+    <!-- <h2>Selected Project : {{selected_project}} <br>Week : {{selected_week}}</h2> -->
+    {% endif %}
+    {% block baseBody %} {% endblock %}
+    <script>
+        $(document).ready(function () {
+            $("#select_project").on("change", function () {
+                $(this).closest("form").submit();
+            });
+        });
+        $(document).ready(function () {
+            $("#select_week").on("change", function () {
+                $(this).closest("form").submit();
+            });
+        });
+    </script>
+</body>
+
+</html>

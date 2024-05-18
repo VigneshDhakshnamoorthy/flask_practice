@@ -69,12 +69,14 @@ class DatabaseHelper:
     
     def execute_query(self, query: str, params: Tuple[Any] = ()) -> None:
         with sqlite3.connect(self.db_name) as conn:
+            conn.row_factory = sqlite3.Row
             cursor: Cursor = conn.cursor()
             cursor.execute(query, params)
             conn.commit()
 
     def fetch_all(self, query: str, params: Tuple[Any] = ()) -> List[Tuple[Any]]:
         with sqlite3.connect(self.db_name) as conn:
+            conn.row_factory = sqlite3.Row
             cursor: Cursor = conn.cursor()
             cursor.execute(query, params)
             return cursor.fetchall()
@@ -88,6 +90,7 @@ class DatabaseHelper:
         placeholders: str = ', '.join(['?' for _ in range(len(list(columns.keys())[1:]))])
         query: str = f"INSERT INTO {table_name} ({', '.join(list(columns.keys())[1:])}) VALUES ({placeholders})"
         with sqlite3.connect(self.db_name) as conn:
+            conn.row_factory = sqlite3.Row
             cursor: Cursor = conn.cursor()
             cursor.executemany(query, data)
             conn.commit()
