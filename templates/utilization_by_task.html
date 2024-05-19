@@ -12,7 +12,7 @@
             <td contenteditable="true">{{ row['task_name'] }}</td>
             <td contenteditable="true">{{ row['hours'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
-            <td><button class="deleteBtn">Delete</button></td>
+            <td><button class="delete_utilization_by_task">Delete</button></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -48,7 +48,7 @@
             });
     });
 
-    document.querySelectorAll('.deleteBtn').forEach(function (button) {
+    document.querySelectorAll('.delete_utilization_by_task').forEach(function (button) {
         button.addEventListener('click', function (event) {
             var row = this.closest('tr');
             var id = row.cells[2].innerText; // Get the ID from the hidden cell

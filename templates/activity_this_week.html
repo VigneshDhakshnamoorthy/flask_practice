@@ -12,7 +12,7 @@
             <td contenteditable="false">{{ row['activity'] }}</td>
             <td contenteditable="true">{{ row['count'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
-            <td><button class="deleteBtn">Delete</button></td>
+            <td><button class="delete_activity_this_week">Delete</button></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -48,7 +48,7 @@
             });
     });
 
-    document.querySelectorAll('.deleteBtn').forEach(function (button) {
+    document.querySelectorAll('.delete_activity_this_week').forEach(function (button) {
         button.addEventListener('click', function (event) {
             var row = this.closest('tr');
             var id = row.cells[2].innerText; // Get the ID from the hidden cell

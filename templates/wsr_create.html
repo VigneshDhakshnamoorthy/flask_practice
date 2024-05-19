@@ -157,20 +157,22 @@
     <button class="addRow" data-table="weekDefectSummary">Add Row</button>
   </div>
 
-  {% set activity_this_week_enabled = activity_this_week_enable | tojson %}
-  {% if activity_this_week_enable %}
+  
   <div class="table-container">
+    {% if activity_this_week_enable %}
     <h2>Activity This Week</h2>
+    {% endif %}
     <table id="activityThisWeek">
+      {% if activity_this_week_enable %}
       <thead>
         <tr>
           <th>Activity</th>
           <th>Count</th>
         </tr>
       </thead>
+      {% endif %}
       <tbody>
-        {% set activities = ['Manual test cases created', 'Manual test cases conducted', 'Automation test cases
-        created', 'Automation test cases processed', 'Bugs identified'] %}
+        {% set activities = ['Manual test cases created', 'Manual test cases conducted', 'Automation test cases created', 'Automation test cases processed', 'Bugs identified'] %}
         {% for activity in activities %}
         <tr class="{% if activity in  activity_this_week_data %}hidden{% endif %}">
           <td>{{ activity }}</td>
@@ -180,7 +182,6 @@
       </tbody>
     </table>
   </div>
-  {% endif %}
   <button id="saveData">Save</button>
   <button id="cancel">Cancel</button>
   <button onclick="window.location.href = '/edit';">Edit</button>
@@ -219,8 +220,6 @@
         }
       });
     });
-    // @ts-nocheck
-    var activityThisWeekEnabled = {{ activity_this_week_enabled }};
     document.getElementById("saveData").addEventListener("click", function () {
       var project = document.getElementById("select_project").value;
       var week = document.getElementById("select_week").value;
@@ -249,9 +248,8 @@
       var task_last_week = collectData('taskLastWeek');
       var task_current_week = collectData('taskCurrentWeek');
       var week_defect_summary = collectData('weekDefectSummary');
-      if (activityThisWeekEnabled) {
-        var activity_this_week = collectData('activityThisWeek');
-      }
+      var activity_this_week = collectData('activityThisWeek');
+      
 
       console.log(activity_this_week)
       fetch('/save_data', {

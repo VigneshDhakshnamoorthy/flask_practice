@@ -71,9 +71,10 @@ def edit() -> str:
     project_list: list =  ["Project1", "Project2"]
     week_list: list =  ["Week1", "Week2"]
     if request.method == 'GET':
-        session["select_project"] = project_list[0]
-        project_select = project_list[0]
-        week_select = week_list[0]
+        project_select = session["select_project"] if "select_project" in session else project_list[0]
+        week_select = session["select_week"] if "select_week" in session else week_list[0]
+        session["select_project"] = project_select
+        session["select_week"] = week_select
 
     if request.method == "POST" and "select_project" in request.form:
         project_select = request.form.get("select_project")
@@ -113,6 +114,7 @@ def update(table_name: str) -> Response | None:
 
 @app.route('/delete/<table_name>/<int:id>', methods=['POST'])
 def delete(table_name: str, id):
+    print(f'DELETE FROM {table_name} WHERE id = ?', (id,))
     db_helper.execute_query(f'DELETE FROM {table_name} WHERE id = ?', (id,))
     return jsonify({'message': 'Success'})
 
