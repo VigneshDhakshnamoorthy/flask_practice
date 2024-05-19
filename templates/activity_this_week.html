@@ -2,8 +2,9 @@
 <table id="activityThisWeek">
     <thead>
         <tr>
-            <th>Activity</th>
-            <th>Count</th>
+            <th style="width: 88%">Activity</th>
+            <th style="width: 6%">Count</th>
+            <th style="width: 6%">Delete</th>
         </tr>
     </thead>
     <tbody>
@@ -12,6 +13,7 @@
             <td contenteditable="false">{{ row['activity'] }}</td>
             <td contenteditable="true">{{ row['count'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
+            
             <td><button class="delete_activity_this_week">Delete</button></td>
         </tr>
         {% endfor %}

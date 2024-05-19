@@ -2,17 +2,18 @@
 <table id="utilizationByTask">
     <thead>
         <tr>
-            <th>Task Name</th>
-            <th>Hours</th>
+            <th style="width: 88%">Task Name</th>
+            <th style="width: 6%">Hours</th>
+            <th style="width: 6%">Delete</th>
         </tr>
     </thead>
     <tbody>
         {% for row in utilization_by_task %}
         <tr>
             <td contenteditable="true">{{ row['task_name'] }}</td>
-            <td contenteditable="true">{{ row['hours'] }}</td>
+            <td contenteditable="true" >{{ row['hours'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
-            <td><button class="delete_utilization_by_task">Delete</button></td>
+            <td ><button class="delete_utilization_by_task button-44">Delete</button></td>
         </tr>
         {% endfor %}
     </tbody>
