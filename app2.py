@@ -1,20 +1,44 @@
 import sqlite3
-from typing import LiteralString
+from typing import Any, List, LiteralString, Tuple
 from database_helper import DatabaseHelper
 from flask import Flask, Response, render_template, request, jsonify, session
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
-db_name = 'database.db'
+db_name = './database/database.db'
 
 db_helper = DatabaseHelper(db_name)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index() -> str:
+    project_select: str | None = None
+    week_select: str | None = None
     project_list: list =  ["Project1", "Project2"]
     week_list: list =  ["Week1", "Week2"]
-    return render_template('wsr_create.html', project_list =project_list, week_list = week_list)
+    if request.method == 'GET':
+        project_select = session["select_project"] if "select_project" in session else project_list[0]
+        week_select = session["select_week"] if "select_week" in session else week_list[0]
+        session["select_project"] = project_select
+        session["select_week"] = week_select
+
+    if request.method == "POST" and "select_project" in request.form:
+        project_select = request.form.get("select_project")
+        session["select_project"] = project_select
+        week_select:str = session["select_week"]
+
+    if request.method == "POST" and "select_week" in request.form:
+        week_select = request.form.get("select_week")
+        session["select_week"] = week_select
+        project_select:str = session["select_project"]
+    print(project_select, week_select)
+    activity_this_week: List[Tuple[Any]] = db_helper.fetch_all('SELECT id, activity, count FROM activity_this_week WHERE project = ? AND week = ?', (project_select, week_select))
+    activity_this_week_size: int = len(activity_this_week)
+    activity_this_week_enable: bool = activity_this_week_size < 5
+    activity_this_week_data: list = []
+    if activity_this_week_size > 0:
+        activity_this_week_data = [dict(row)['activity'] for row in activity_this_week]
+    return render_template('wsr_create.html', project_list =project_list, week_list = week_list, selected_project = project_select, selected_week = week_select, activity_this_week_enable = activity_this_week_enable, activity_this_week_data=activity_this_week_data)
 
 @app.route('/save_data', methods=['POST'])
 def save_data() -> str:
@@ -25,8 +49,11 @@ def save_data() -> str:
         def save_to_table(table_name, data):
             project = request.json['project']
             week = request.json['week']
-            data_to_save = [(project, week) + tuple(row) for row in data]
-            db_helper.save_data(table_name, db_helper.get_table_dict()[table_name],data_to_save)
+            if data:
+                data_to_save = [(project, week) + tuple(row) for row in data]
+                filtered_data = [tup for tup in data_to_save if any(tup[:2]) and any(tup[2:])]
+                print(filtered_data)
+                db_helper.save_data(table_name, db_helper.get_table_dict()[table_name],filtered_data)
 
         save_to_table('utilization_by_task', request.json['utilization_by_task'])
         save_to_table('utilization_by_resource', request.json['utilization_by_resource'])

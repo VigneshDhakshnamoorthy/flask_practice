@@ -1,4 +1,4 @@
-<h1>Activity This Week</h1>
+<h2>Activity This Week</h2>
 <table id="activityThisWeek">
     <thead>
         <tr>
@@ -9,7 +9,7 @@
     <tbody>
         {% for row in activity_this_week %}
         <tr>
-            <td contenteditable="true">{{ row['activity'] }}</td>
+            <td contenteditable="false">{{ row['activity'] }}</td>
             <td contenteditable="true">{{ row['count'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
             <td><button class="deleteBtn">Delete</button></td>
@@ -17,10 +17,10 @@
         {% endfor %}
     </tbody>
 </table>
-<button id="updateBtn">Update</button>
+<button id="update_activity_this_week">Update</button>
 
 <script>
-    document.getElementById('updateBtn').addEventListener('click', function () {
+    document.getElementById('update_activity_this_week').addEventListener('click', function () {
         var updatedData = [];
         var tableRows = document.querySelectorAll('#activityThisWeek tbody tr');
         tableRows.forEach(function (row) {

@@ -4,16 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>Client Information</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
     table {
       border-collapse: collapse;
       width: 100%;
-      margin-top: 20px;
     }
 
     th,
@@ -23,6 +19,14 @@
       padding: 8px;
     }
 
+    th {
+      background-color: #f2f2f2;
+    }
+
+    td {
+      cursor: pointer;
+    }
+
     button {
       margin-top: 10px;
     }
@@ -30,25 +34,38 @@
     .table-container {
       margin-bottom: 30px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
   <h1>WSR Creation</h1>
 
-  <div>
-    <select id="projectSelect">
-        {% for option in project_list %}
+  <div style="display: flex;">
+    <form method="POST">
+      <label for="select_project" style="font-size: small"><b>SELECT PROJECT</b></label><span class=""> : </span>
+      <select id="select_project" name="select_project">
+        {% for option in project_list %} {% if option == selected_project %}
+        <option value="{{ option }}" selected>{{ option }}</option>
+        {% else %}
         <option value="{{ option }}">{{ option }}</option>
-        {% endfor %}
-      <!-- Add more projects as needed -->
-    </select>
-
-    <select id="weekSelect">
-        {% for option in week_list %}
+        {% endif %} {% endfor %}
+      </select>
+    </form>
+    <div>&emsp;</div>
+    <form method="POST">
+      <label for="select_week" style="font-size: small"><b>SELECT WEEK</b></label><span class=""> : </span>
+      <select id="select_week" name="select_week">
+        {% for option in week_list %} {% if option == selected_week %}
+        <option value="{{ option }}" selected>{{ option }}</option>
+        {% else %}
         <option value="{{ option }}">{{ option }}</option>
-        {% endfor %}
-    </select>
+        {% endif %} {% endfor %}
+      </select>
+    </form>
   </div>
 
   <div class="table-container">
@@ -140,6 +157,8 @@
     <button class="addRow" data-table="weekDefectSummary">Add Row</button>
   </div>
 
+  {% set activity_this_week_enabled = activity_this_week_enable | tojson %}
+  {% if activity_this_week_enable %}
   <div class="table-container">
     <h2>Activity This Week</h2>
     <table id="activityThisWeek">
@@ -150,21 +169,38 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>Manual test cases created</td><td contenteditable="true"></td></tr>
-        <tr><td>Manual test cases conducted</td><td contenteditable="true"></td></tr>
-        <tr><td>Automation test cases created</td><td contenteditable="true"></td></tr>
-        <tr><td>Automation test cases processed</td><td contenteditable="true"></td></tr>
-        <tr><td>Bugs identified</td><td contenteditable="true"></td></tr>
-
-        <!-- Data rows will be inserted here dynamically -->
+        {% set activities = ['Manual test cases created', 'Manual test cases conducted', 'Automation test cases
+        created', 'Automation test cases processed', 'Bugs identified'] %}
+        {% for activity in activities %}
+        <tr class="{% if activity in  activity_this_week_data %}hidden{% endif %}">
+          <td>{{ activity }}</td>
+          <td contenteditable="true"></td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
-
+  {% endif %}
   <button id="saveData">Save</button>
   <button id="cancel">Cancel</button>
   <button onclick="window.location.href = '/edit';">Edit</button>
   <script>
+    $(document).ready(function () {
+      $("#select_project").on("change", function () {
+        $(this).closest("form").submit();
+      });
+    });
+    $(document).ready(function () {
+      $("#select_week").on("change", function () {
+        $(this).closest("form").submit();
+      });
+    });
+
+    const tableConfigurations = {
+      "weekDefectSummary": 5,
+      "taskLastWeek": 2,
+      "taskCurrentWeek": 2
+    };
     document.querySelectorAll(".addRow").forEach(button => {
       button.addEventListener("click", function () {
         var tableId = this.getAttribute('data-table');
@@ -173,14 +209,21 @@
         var numCols = table.rows[0].cells.length;
         for (var i = 0; i < numCols; i++) {
           var cell = newRow.insertCell(i);
-          cell.contentEditable = true;
+          if (tableConfigurations.hasOwnProperty(tableId) && i === tableConfigurations[tableId]) {
+            const input = document.createElement('input');
+            input.type = 'date';
+            cell.appendChild(input);
+          } else {
+            cell.contentEditable = true;
+          }
         }
       });
     });
-
+    // @ts-nocheck
+    var activityThisWeekEnabled = {{ activity_this_week_enabled }};
     document.getElementById("saveData").addEventListener("click", function () {
-      var project = document.getElementById("projectSelect").value;
-      var week = document.getElementById("weekSelect").value;
+      var project = document.getElementById("select_project").value;
+      var week = document.getElementById("select_week").value;
 
       function collectData(tableId) {
         var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
@@ -192,7 +235,7 @@
           if (tableId === 'activityThisWeek' && cells[cells.length - 1].innerText.trim() === "") {
             console.log("Empty last column, skipping row");
             continue;
-        }
+          }
           for (var j = 0; j < cells.length; j++) {
             rowData.push(cells[j].innerText);
           }
@@ -200,13 +243,16 @@
         }
         return data;
       }
-
+      var activity_this_week = null;
       var utilization_by_task = collectData('utilizationByTask');
       var utilization_by_resource = collectData('utilizationByResource');
       var task_last_week = collectData('taskLastWeek');
       var task_current_week = collectData('taskCurrentWeek');
       var week_defect_summary = collectData('weekDefectSummary');
-      var activity_this_week = collectData('activityThisWeek');
+      if (activityThisWeekEnabled) {
+        var activity_this_week = collectData('activityThisWeek');
+      }
+
       console.log(activity_this_week)
       fetch('/save_data', {
         method: 'POST',
@@ -229,13 +275,14 @@
         } else {
           alert('Error saving data');
         }
+        location.reload();
       });
 
     });
 
     document.getElementById("cancel").addEventListener("click", function () {
       document.querySelectorAll("tbody").forEach(tbody => {
-        tbody.innerHTML = ''; // Clear table bodies
+        tbody.innerHTML = '';
       });
     });
   </script>

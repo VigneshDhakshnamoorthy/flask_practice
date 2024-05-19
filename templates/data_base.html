@@ -30,6 +30,8 @@
 </head>
 
 <body>
+    <h1>WSR Edit</h1>
+    <div style="display: flex;">
     <form method="POST">
         <label for="select_project" style="font-size: small"><b>SELECT PROJECT</b></label><span class=""> : </span>
         <select id="select_project" name="select_project">
@@ -40,6 +42,7 @@
             {% endif %} {% endfor %}
         </select>
     </form>
+    <div>&emsp;</div>
     <form method="POST">
         <label for="select_week" style="font-size: small"><b>SELECT WEEK</b></label><span class=""> : </span>
         <select id="select_week" name="select_week">
@@ -50,6 +53,7 @@
             {% endif %} {% endfor %}
         </select>
     </form>
+</div>
     {% if not selected_project == None or selected_week == None%}
     <!-- <h2>Selected Project : {{selected_project}} <br>Week : {{selected_week}}</h2> -->
     {% endif %}
