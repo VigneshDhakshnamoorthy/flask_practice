@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,19 +10,24 @@
             border-collapse: collapse;
             width: 100%;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #dddddd;
             text-align: left;
             padding: 8px;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         td {
             cursor: pointer;
         }
     </style>
 </head>
+
 <body>
     <h1>Editable Table</h1>
     <table id="editableTable">
@@ -66,14 +72,15 @@
                 },
                 body: JSON.stringify({ data: updatedData })
             })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         });
     </script>
 </body>
+
 </html>

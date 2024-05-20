@@ -4,45 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/wsr.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>Client Information</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th,
-    td {
-      border: 1px solid #dddddd;
-      text-align: left;
-      padding: 8px;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
-    td {
-      cursor: pointer;
-    }
-
-    button {
-      margin-top: 10px;
-    }
-
-    .table-container {
-      margin-bottom: 30px;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
 </head>
 
 <body>
-  <h1>WSR Creation</h1>
+  <h1>WSR Creation   <button onclick="window.location.href = '/edit';" class="wsrNavBtn">Edit</button>  </h1>
 
   <div style="display: flex;">
     <form method="POST">
@@ -81,7 +49,7 @@
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
-    <button class="addRow" data-table="utilizationByTask">Add Row</button>
+    <button class="addRow addRoweBtn" data-table="utilizationByTask">Add Row</button>
   </div>
 
   <div class="table-container">
@@ -97,7 +65,7 @@
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
-    <button class="addRow" data-table="utilizationByResource">Add Row</button>
+    <button class="addRow addRoweBtn" data-table="utilizationByResource">Add Row</button>
   </div>
 
   <div class="table-container">
@@ -115,7 +83,7 @@
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
-    <button class="addRow" data-table="taskLastWeek">Add Row</button>
+    <button class="addRow addRoweBtn" data-table="taskLastWeek">Add Row</button>
   </div>
 
   <div class="table-container">
@@ -133,7 +101,7 @@
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
-    <button class="addRow" data-table="taskCurrentWeek">Add Row</button>
+    <button class="addRow addRoweBtn" data-table="taskCurrentWeek">Add Row</button>
   </div>
 
   <div class="table-container">
@@ -154,7 +122,7 @@
         <!-- Data rows will be inserted here dynamically -->
       </tbody>
     </table>
-    <button class="addRow" data-table="weekDefectSummary">Add Row</button>
+    <button class="addRow addRoweBtn" data-table="weekDefectSummary">Add Row</button>
   </div>
 
   
@@ -182,9 +150,8 @@
       </tbody>
     </table>
   </div>
-  <button id="saveData">Save</button>
-  <button id="cancel">Cancel</button>
-  <button onclick="window.location.href = '/edit';">Edit</button>
+  <button id="saveData" class="updateBtn">Save</button>
+  <button id="cancel" class="deleteBtn">Cancel</button>
   <script>
     $(document).ready(function () {
       $("#select_project").on("change", function () {
@@ -218,6 +185,17 @@
             cell.contentEditable = true;
           }
         }
+        var deleteCell = newRow.insertCell(numCols);
+            deleteCell.style.width = "14%";
+            var deleteButton = document.createElement('button');
+            deleteButton.classList.add('deleteRow');
+            deleteButton.classList.add('deleteBtn');
+            deleteButton.innerText = 'Delete';
+            deleteButton.addEventListener('click', function () {
+                var row = this.closest('tr');
+                row.remove();
+            });
+            deleteCell.appendChild(deleteButton);
       });
     });
     document.getElementById("saveData").addEventListener("click", function () {

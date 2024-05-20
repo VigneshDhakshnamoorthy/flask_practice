@@ -14,12 +14,12 @@
             <td contenteditable="true">{{ row['count'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
             
-            <td><button class="delete_activity_this_week">Delete</button></td>
+            <td><button class="delete_activity_this_week deleteBtn">Delete</button></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<button id="update_activity_this_week">Update</button>
+<button id="update_activity_this_week" class="updateBtn">Update</button>
 
 <script>
     document.getElementById('update_activity_this_week').addEventListener('click', function () {

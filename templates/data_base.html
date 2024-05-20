@@ -4,34 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/wsr.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Edit WSR</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th,
-        td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        td {
-            cursor: pointer;
-        }
-        
-    </style>
 </head>
 
 <body>
-    <h1>WSR Edit</h1>
+    <h1>WSR Edit <button onclick="window.location.href = '/';" class="wsrNavBtn">Create</button>    </h1>
     <div style="display: flex;">
     <form method="POST">
         <label for="select_project" style="font-size: small"><b>SELECT PROJECT</b></label><span class=""> : </span>

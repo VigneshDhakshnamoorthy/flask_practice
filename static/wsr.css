@@ -1,0 +1,62 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  td {
+    cursor: pointer;
+  }
+
+  button {
+    border: none;
+    color: black;
+    padding: 6px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    font-weight:300;
+    margin: 1px 1px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+
+  .table-container {
+    margin-bottom: 60px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .updateBtn {
+    margin-top: 10px;
+    background-color: #04AA6D;
+    color: white;
+  }
+
+  .addRoweBtn {
+    margin-top: 10px;
+    background-color: #14d9d6;
+    color: rgb(0, 0, 0);
+  }
+
+  .deleteBtn {
+    background-color: #d0412e;
+    color: white;
+  }
+  .wsrNavBtn {
+    background-color: #4e3766;
+    color: white;
+  }

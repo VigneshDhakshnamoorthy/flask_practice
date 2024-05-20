@@ -13,12 +13,12 @@
             <td contenteditable="true">{{ row['task_name'] }}</td>
             <td contenteditable="true" >{{ row['hours'] }}</td>
             <td style="display: none;">{{ row['id'] }}</td>
-            <td ><button class="delete_utilization_by_task button-44">Delete</button></td>
+            <td ><button class="delete_utilization_by_task deleteBtn">Delete</button></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<button id="update_utilization_by_task">Update</button>
+<button id="update_utilization_by_task" class="updateBtn">Update</button>
 
 <script>
     document.getElementById('update_utilization_by_task').addEventListener('click', function () {
